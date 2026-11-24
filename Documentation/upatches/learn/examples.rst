@@ -12,8 +12,9 @@ The tree ships packages under :src:`upatches/`: ``kernel-obs``, a
 complete observability package with arena tables, serializers, decoders
 and generated ``.rodata``, in ``kernel-cve`` three small CVE
 detectors exported from a mitigation campaign and one CVE mitigation,
-each a package of its own, and ``app-sandbox``, which enforces with
-policy labels and generated ``.rodata``.
+each a package of its own, and ``app-sandbox`` and
+``2shell-containment``, which enforce with policy labels and generated
+``.rodata``.
 
 kernel-obs
 ----------
@@ -186,6 +187,13 @@ fails the build for rules without a policy table. The package's
 cover. ``t9114-app-sandbox`` takes the package from its sources to a
 node and back (:ref:`testing-sandbox`), and :src:`tools/put-shields`
 publishes it with the shields of ``kernel-cve``.
+
+The ``2shell-containment`` package uses the same hooks with profiles for
+nginx, Ruby, Node.js, Bun and Envoy. Its example policy limits each
+profile to its own executables and to loopback IP peers. The tree
+selects nodes with ``shell-wave-containment=enabled``. The underlying
+vulnerabilities require vendor updates. Build and site configuration
+are described in the package documentation. :src:`upatches/app-sandbox/README.md`
 
 Related
 -------

@@ -1,0 +1,54 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 Authors of shirudo
+
+[package]
+name = "2shell-containment"
+description = "Restrict subprocess execution and outbound IP connections for selected 2Shell workloads"
+license = "GPL-2.0 OR BSD-2-Clause"
+authors = ["Authors of shirudo"]
+
+[[files]]
+source = "2shell-policy.toml"
+
+[[files]]
+source = "gen_policy.py"
+
+[[upatches]]
+source = "2shell-containment.bpf.c"
+
+[[upatches.rodata]]
+symbol = "sandbox_policy"
+input = "2shell-policy.toml"
+generator = ["python3", "gen_policy.py", "--beefile", "Beefile.2shell-containment"]
+update = ["python3", "gen_policy.py"]
+
+[[upatches.policy]]
+id = "nginx"
+bit = 0x4
+paths = ["/usr/sbin/nginx", "/usr/local/nginx/sbin/nginx"]
+
+[[upatches.policy]]
+id = "ruby"
+bit = 0x8
+paths = ["/usr/bin/ruby", "/usr/local/bin/ruby"]
+
+[[upatches.policy]]
+id = "node"
+bit = 0x10
+paths = ["/usr/bin/node", "/usr/local/bin/node"]
+
+[[upatches.policy]]
+id = "bun"
+bit = 0x20
+paths = ["/usr/bin/bun", "/usr/local/bin/bun"]
+
+[[upatches.policy]]
+id = "envoy"
+bit = 0x40
+paths = ["/usr/bin/envoy", "/usr/local/bin/envoy"]
+
+[upatches.tree]
+id = "2shell-containment"
+
+[upatches.tree.selector.labels]
+shell-wave-containment = ["enabled"]

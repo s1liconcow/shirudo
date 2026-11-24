@@ -1,0 +1,25 @@
+# SPDX-License-Identifier: BSD-2-Clause
+# Copyright (c) 2026 Authors of shirudo
+
+[networks]
+loopback = ["127.0.0.0/8", "::1/128"]
+
+[sandbox.nginx]
+exec = []
+network = ["@loopback"]
+
+[sandbox.ruby]
+exec = []
+network = ["@loopback"]
+
+[sandbox.node]
+exec = []
+network = ["@loopback"]
+
+[sandbox.bun]
+exec = []
+network = ["@loopback"]
+
+[sandbox.envoy]
+exec = []
+network = ["@loopback"]

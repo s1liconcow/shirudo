@@ -129,6 +129,47 @@ leaves the labels, which restrict nothing once the upatch is gone.
 
 Every refusal is `EACCES`.
 
+## Contain other 2Shell workloads
+
+`Beefile.2shell-containment` builds a second package using the same BPF
+sandbox. It covers nginx for CVE-2026-123007 and CVE-2026-123633, Ruby
+for CVE-2026-132825, and the Node.js, Bun and Envoy executables for
+CVE-2026-111497 in their Brotli decoders. It can run alongside the PHP
+sandbox. Each profile allows execution of its own labeled files and
+allows new IP connections only to loopback. The sandbox cannot repair
+the vulnerable code in a running process or cover every application
+that embeds Brotli. The tree entry leaves advisory fix status to the
+vendor upgrades.
+
+Review the executable paths and policy bits in `Beefile.2shell-containment`
+before signing. The restrictions apply to every task that executes a
+labeled inode, regardless of its path, and its descendants. Use separate
+copies of the executable where applications need different policies. Add
+the actual paths for any other Brotli consumers you intend to contain.
+Allow the services' required upstream IP networks and child executables
+in a site policy, then test the services on a Shirudo target. The limits
+below also apply to this package.
+
+```sh
+shirudo bpm build --file upatches/app-sandbox/Beefile.2shell-containment \
+    --version 1.0.0 --keys-dir "$KEYS" \
+    --rodata-input 2shell-policy=/path/to/site-policy.toml
+shirudo bpm info data 2shell-containment-1.0.0.bee upatches/2shell-containment.upatch
+```
+
+Tree delivery selects nodes whose `shell-wave-containment` label is
+`enabled`. A direct install applies the policy without that selection.
+Restart the selected services after the first load so their workers
+acquire the policy bits. For the underlying fixes, use these upstream
+releases or your vendor's backports.
+
+| CVE | Fixed upstream releases |
+|---|---|
+| CVE-2026-109618, CVE-2026-109619 | PHP 8.2.35, 8.3.36, 8.4.27 and 8.5.12. [PHP security release](https://www.php.net/archive/2026.php#2026-10-21-5) |
+| CVE-2026-111497 | Brotli 1.0.10, 1.1.1 and 1.2.1. Update each product that embeds a copy. [Brotli releases](https://github.com/google/brotli/releases), [Node.js security release](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases), [Bun advisory](https://github.com/oven-sh/bun/security/advisories/GHSA-663w-cv8g-jj2p), [Envoy advisory](https://github.com/envoyproxy/envoy/security/advisories/GHSA-3wvj-j6qm-62mr) |
+| CVE-2026-123007, CVE-2026-123633 | nginx 1.30.7 and 1.31.9. [nginx advisories](https://nginx.org/en/security_advisories.html) |
+| CVE-2026-132825 | Ruby 3.3.14, 3.4.13 and 4.0.10. [Ruby advisory](https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/) |
+
 ## Try it with Apache
 
 `demo/` in the source of this package holds a web server to try the
